@@ -1,0 +1,61 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.8	//
+AddTicket	AuthServer.cpp	/^void AuthServer::AddTicket(const std::string& ticket, Auth::Account* account)$/;"	f	class:Adoter::AuthServer
+Adoter	AuthServer.cpp	/^namespace Adoter$/;"	n	file:
+Adoter	AuthServer.h	/^namespace Adoter$/;"	n
+Adoter	Session.cpp	/^namespace Adoter$/;"	n	file:
+Adoter	Session.h	/^namespace Adoter$/;"	n
+AuthInstance	AuthServer.h	62;"	d
+AuthServer	AuthServer.h	/^class AuthServer $/;"	c	namespace:Adoter
+BASE_OBJ	Makefile	/^BASE_OBJ=Session.o AuthServer.o$/;"	m
+BIN	Makefile	/^BIN=AuthServer$/;"	m
+CXX	Makefile	/^CXX=g++$/;"	m
+CallBack	Session.h	/^	typedef std::function<int32_t(Message*)> CallBack;$/;"	t	class:Adoter::Session
+CheckAccount	AuthServer.h	/^	bool CheckAccount() { return true; }$/;"	f	class:Adoter::AuthServer
+CleanLoginTickets	AuthServer.cpp	/^void AuthServer::CleanLoginTickets(const boost::system::error_code& error)$/;"	f	class:Adoter::AuthServer
+CreateThreads	Session.cpp	/^NetworkThread<Session>* SessionManager::CreateThreads() const$/;"	f	class:Adoter::SessionManager
+HandleLogin	AuthServer.cpp	/^void AuthServer::HandleLogin(\/*Session* session*\/)$/;"	f	class:Adoter::AuthServer
+INCPATH	Makefile	/^INCPATH=-I. -I.. -I$(PROTOBUF_DIR)\/include -I$(BOOST_ROOT)$/;"	m
+InitializeHandler	Session.cpp	/^void Session::InitializeHandler(const boost::system::error_code error, const std::size_t bytes_transferred)$/;"	f	class:Adoter::Session
+Instance	AuthServer.h	/^	static AuthServer& Instance()$/;"	f	class:Adoter::AuthServer
+Instance	Session.h	/^	static SessionManager& Instance()$/;"	f	class:Adoter::SessionManager
+LDFLAGS	Makefile	/^LDFLAGS = -lboost_system -lboost_thread -lprotobuf$/;"	m
+LIBRARY	Makefile	/^LIBRARY=$(PROTOBUF_DIR)\/lib\/libprotobuf.a -L$(BOOST_ROOT)\/stage\/lib\/ $/;"	m
+OnAccept	AuthServer.cpp	/^void AuthServer::OnAccept(const boost::system::error_code& ec)$/;"	f	class:Adoter::AuthServer
+OnSocketAccept	Session.cpp	/^void SessionManager::OnSocketAccept(tcp::socket&& socket, int32_t thread_index)$/;"	f	class:Adoter::SessionManager
+PROTO_OBJ	Makefile	/^PROTO_OBJ=$(patsubst %.proto,%.pb.o,$(PROTO_SRC))$/;"	m
+PROTO_OPTIONS	Makefile	/^PROTO_OPTIONS=--proto_path=. --proto_path=$(PROTOBUF_DIR)\/include$/;"	m
+PROTO_SRC	Makefile	/^PROTO_SRC=Login.proto $/;"	m
+Run	AuthServer.cpp	/^void AuthServer::Run()$/;"	f	class:Adoter::AuthServer
+Session	Session.cpp	/^Session::Session(boost::asio::ip::tcp::socket&& socket) : Socket(std::move(socket))$/;"	f	class:Adoter::Session
+Session	Session.h	/^class Session : public Socket<Session>$/;"	c	namespace:Adoter
+SessionInstance	Session.h	45;"	d
+SessionManager	Session.h	/^class SessionManager : public SocketManager<Session> $/;"	c	namespace:Adoter
+SignalHandler	Main.cpp	/^void SignalHandler(const boost::system::error_code& error, int number)$/;"	f
+Start	AuthServer.cpp	/^bool AuthServer::Start(boost::asio::io_service& io_service)$/;"	f	class:Adoter::AuthServer
+Start	Session.cpp	/^void Session::Start()$/;"	f	class:Adoter::Session
+StartNetwork	Session.cpp	/^bool SessionManager::StartNetwork(boost::asio::io_service& io_service, const std::string& bind_ip, int32_t port, int thread_count)$/;"	f	class:Adoter::SessionManager
+Stop	AuthServer.cpp	/^void AuthServer::Stop()$/;"	f	class:Adoter::AuthServer
+SuperSocketManager	Session.h	/^	typedef SocketManager<Session> SuperSocketManager;$/;"	t	class:Adoter::SessionManager
+_bind_ip	AuthServer.h	/^	std::string _bind_ip;$/;"	m	class:Adoter::AuthServer
+_bind_port	AuthServer.h	/^	int32_t _bind_port;$/;"	m	class:Adoter::AuthServer
+_external_address	AuthServer.h	/^	boost::asio::ip::tcp::endpoint _external_address;    $/;"	m	class:Adoter::AuthServer
+_io_service	Main.cpp	/^static boost::asio::io_service* _io_service;$/;"	v	file:
+_local_address	AuthServer.h	/^	boost::asio::ip::tcp::endpoint _local_address;$/;"	m	class:Adoter::AuthServer
+_stopped	AuthServer.h	/^	std::atomic<bool> _stopped;$/;"	m	class:Adoter::AuthServer
+_thread	AuthServer.h	/^	std::thread _thread;$/;"	m	class:Adoter::AuthServer
+_ticket_cleanup_timer	AuthServer.h	/^	boost::asio::deadline_timer* _ticket_cleanup_timer; \/\/登录认证清理超时$/;"	m	class:Adoter::AuthServer
+_ticket_mutex	AuthServer.h	/^	std::mutex _ticket_mutex;    $/;"	m	class:Adoter::AuthServer
+_valid_tickets	AuthServer.h	/^	std::unordered_map<std::string, std::shared_ptr<Auth::Account>> _valid_tickets;    $/;"	m	class:Adoter::AuthServer
+main	Main.cpp	/^int main(int argc, const char* argv[])$/;"	f
+override	Session.h	/^	NetworkThread<Session>* CreateThreads() const override;$/;"	m	class:Adoter::SessionManager
+override	Session.h	/^	bool StartNetwork(boost::asio::io_service& io_service, const std::string& bind_ip, int32_t port, int thread_count = 1) override;$/;"	m	class:Adoter::SessionManager
+override	Session.h	/^	virtual void Start() override;$/;"	m	class:Adoter::Session
+right	Session.h	/^	Session& operator=(Session const& right) = delete;$/;"	m	class:Adoter::Session
+right	Session.h	/^	Session(Session const& right) = delete;    $/;"	m	class:Adoter::Session
+~AuthServer	AuthServer.h	/^	~AuthServer() $/;"	f	class:Adoter::AuthServer
+~Session	Session.h	/^	virtual ~Session() { }$/;"	f	class:Adoter::Session

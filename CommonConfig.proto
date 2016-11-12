@@ -1,0 +1,307 @@
+import "google/protobuf/descriptor.proto";
+
+package real;
+/////////////////////////////////////////////////////
+// 
+// 游戏中各种配置，物品数据结构定义 
+//
+// 配置区别与物品的主要依据之一就是：要不要显示在包裹里面.
+//  
+/////////////////////////////////////////////////////
+
+/////////////////////////////////////////////////////
+// 通用数据定义区：即其他(.proto)文件也用的定义数据
+/////////////////////////////////////////////////////
+
+extend google.protobuf.EnumValueOptions {
+	optional int32 inventory_size = 60000; //包裹初始大小
+}
+
+extend google.protobuf.FieldOptions {
+	optional int32 repeated_size = 60001; //默认大小
+}
+
+//职业
+enum ProfType {
+	PROFTYPE_FARMER = 0x0001; //农民
+	PROFTYPE_FARMER_HOSTER = 0x0002; //农场主
+	PROFTYPE_FARMER_AND_HOSTER = 0x0003; //农民|农场主
+	PROFTYPE_COWBOY = 0x0004; //牛仔
+	PROFTYPE_BOUNTY_HUNTER = 0x0010; //赏金猎人
+}
+
+//包裹类型：必须按照顺序添加
+enum InventoryType {
+	INVENTORY_TYPE_BACKPACKAGE = 1 [ (inventory_size) = 64 ]; //普通包裹
+	INVENTORY_TYPE_EQUIPMENT = 2 [ (inventory_size) = 6 ]; //装备包裹
+	INVENTORY_TYPE_FASHION = 3 [ (inventory_size) = 16 ]; //时装包裹
+	INVENTORY_TYPE_COUNT = 4; //最大包裹数
+}
+
+//实体类型
+enum EntityType {
+	ENTITY_TYPE_NIL = 1; //开始
+	ENTITY_TYPE_PLAYER = 2;	//玩家
+	ENTITY_TYPE_HOST = 3; //本地居民(具有强大AI系统的模拟玩家)
+	ENTITY_TYPE_NPC = 4; //提供服务的模拟玩家
+	ENTITY_TYPE_BUILDING = 5; //建筑
+	ENTITY_TYPE_SEA = 6; //海洋
+	ENTITY_TYPE_AIR = 7; //空中
+	ENTITY_TYPE_LAND = 8; //陆面
+}
+
+//二维坐标
+message Vector2 {
+	optional float x = 1;
+	optional float z = 2;
+}
+
+//三维坐标
+message Vector3 {
+	optional float x = 1;
+	optional float y = 2;
+	optional float z = 3;
+}
+
+//阵营
+enum CampType {
+	CAMP_TYPE_HUMON = 1;
+
+}
+
+//玩家、AI、NPC公共数据 //说明：定义在这里只是因为有NPC要配置
+message CommonProp {
+	optional int64 id = 1;	//唯一识别码
+	optional EntityType entity_type = 2; //实体类型
+	optional bytes name = 3; //名字
+	optional int32 radius = 4; //模型半径
+	optional int32 height = 5; //模型高度
+	optional int32 level = 6; //级别
+	optional int32 gender = 7; //性别
+	optional int32 profession = 8; //职业
+	optional int32 speed = 9; //移动速度
+	optional int32 hp = 10; //血量
+	optional int32 mp = 11; //魔法
+	optional int32 orientation = 12; //角度、朝向(弧度计算公式：radius = orientation * (2 * 3.1415926 / 360))
+	optional int32 scene_id = 13; //地图、场景(如果是NPC，则为出生地图)
+	optional Vector3 position = 14; //位置(如果是NPC，则为出生地点)
+	optional float visibility_range = 15 [ default = 90.0 ]; //视野范围
+	optional CampType camp_type = 16; //阵营
+	repeated int32 skills = 17 [ (repeated_size) = 4]; //技能ID([Skill]数据)
+	optional int32 level_up_id = 18; //升级曲线ID([LevelUpCurve]数据)
+}
+
+/////////////////////////////////////////////////////
+// 数据地区版本
+/////////////////////////////////////////////////////
+enum Version {
+	GLOBAL = 0x00000001; //全球统一数据
+	MAINLAND = 0x00000002; //大陆(中国区不包括台湾、香港、澳门)
+	TAIWAN = 0x00000003; //台湾
+}
+
+/////////////////////////////////////////////////////
+// 配置类型
+// 
+// 一定要简单，易于读取和使用
+//
+/////////////////////////////////////////////////////
+enum ConfigType {
+	///////////配置类型///////////
+	CONFIG_TYPE_BEGIN = 1; //配置开始
+	CONFIG_TYPE_PLANT = 2; //种植
+	CONFIG_TYPE_COMMON_LIMIT = 3; //通用限制
+	CONFIG_TYPE_COMMON_REWARD = 4; //通用奖励
+	CONFIG_TYPE_COOL_DOWN = 5; //冷却
+	CONFIG_TYPE_HOSTER = 6; //居民(即我们通常所说的NPC、AI或者...西部世界)
+	CONFIG_TYPE_SKILL = 7; //技能
+	CONFIG_TYPE_LEVEL_UP = 8; //升级曲线
+	CONFIG_TYPE_SCENE = 9; //场景(这里指每个地图)
+	CONFIG_TYPE_COUNT = 200; //最大配置数
+	///////////物品类型///////////
+	ITEM_TYPE_BEGIN = 201; //物品开始
+	ITEM_TYPE_POTION = 202; //药品
+	ITEM_TYPE_EQUIPMENT = 203; //装备
+	ITEM_TYPE_GUN = 204; //枪
+}
+
+//公共配置
+message CCommonProp {
+	required int32 id = 1; //索引：唯一标识ID
+	required Version version = 2; //版本
+	optional string name = 3; //名称
+}
+
+/////////////////////////////////////////////////////
+// 配置数据类别定义区
+// 
+// 每项必须含有字段，且位置索引不能更换：
+//
+//	optional ConfigType type_t = 1 [ default = CONFIG_TYPE_PLANT ];  //需要指定默认值
+//	
+//	optional CCommonProp common_prop = 2;
+// 
+/////////////////////////////////////////////////////
+
+//种植
+message Plant {	
+	optional ConfigType type_t = 1 [ default = CONFIG_TYPE_PLANT ];
+	optional CCommonProp common_prop = 2;
+}
+
+//通用限制
+message CommonLimit {
+	//限制类型(主要用于日志)
+	enum CommonLimitType {
+		COMMON_LIMIT_TYPE_PLANT = 1; //种植次数限制
+	}
+	//冷却时间
+	enum CoolDownType {
+		COOL_DOWN_TYPE_DAY = 1; //每天
+		COOL_DOWN_TYPE_WEEK = 2; //每周
+		COOL_DOWN_TYPE_MONTH = 3; //每月
+		COOL_DOWN_TYPE_YEAR = 4; //每年
+		COOL_DOWN_TYPE_NEVER = 5; //永不
+	}
+	optional ConfigType type_t = 1 [ default = CONFIG_TYPE_COMMON_LIMIT ];
+	optional CCommonProp common_prop = 2;
+	optional CommonLimitType limit_type = 3;
+	optional CoolDownType cool_down_type = 4;
+}
+
+//冷却
+message CoolDown {
+	optional ConfigType type_t = 1 [ default = CONFIG_TYPE_COOL_DOWN ];
+	optional CCommonProp common_prop = 2;
+	optional int32 time = 3; //冷却时间(ms)
+}
+
+//居民(通常所说的NPC、AI、或者...)
+message Hoster {
+	optional ConfigType type_t = 1 [ default = CONFIG_TYPE_HOSTER ];
+	optional CCommonProp common_prop = 2;
+	optional CommonProp human_prop = 3; //具有玩家属性
+	optional string behaviac_tree_path = 4; //行为树路径
+	optional int32 build_time = 5; //部署时间
+	optional int32 attack_speed = 6; //攻击速度
+	optional int32 produce_entity_id = 7; //每次生产实体ID(可以是物品、怪物、或者资源...)
+	optional int32 produce_entity_speed = 8; //每次生产实体速度(每X秒生产一次)
+	optional int32 produce_entity_count = 9; //每次生产实体数量
+}
+
+//攻击
+message Harm {
+	enum HarmType {
+		HARM_TYPE_HP = 1; //减血
+		HARM_TYPE_MP = 2; //减魔
+		HARM_TYPE_SPEED = 3; //减速
+	}
+	optional HarmType harm_type = 1; //伤害类型
+	optional int32 harm_total = 2; //伤害值(负值表示增加)
+	optional int32 last_time = 3; //持续时间(秒)
+	optional int32 harm_per_second = 4; //每秒伤害(持续伤害)
+	optional int32 harm_range = 5; //攻击范围
+	optional EntityType harm_target = 6; //攻击目标(如果为0，表示都能伤害)
+}
+
+//技能
+message Skill {
+	optional ConfigType type_t = 1 [ default = CONFIG_TYPE_SKILL ];
+	optional CCommonProp common_prop = 2;
+	optional int32 level = 3; //技能等级
+	optional string behaviac_tree_path = 4; //行为树路径
+	optional int32 cool_down_id = 5; //冷却ID([CoolDown]数据) 
+	optional int32 defense = 6; //防御力 
+	optional Harm harm = 7; //伤害
+	optional int32 summon_entity_id = 8; //召唤实体：每次使用召唤出一个NPC
+	optional int32 death_harm_total = 9; //死亡伤害：拥有该技能的主体死亡，给周围玩家造成伤害
+}
+
+//升级曲线
+message LevelUpCurve {
+	optional ConfigType type_t = 1 [ default = CONFIG_TYPE_LEVEL_UP ];
+	optional CCommonProp common_prop = 2;
+	//升级消耗
+	message Consume {
+		//消耗类型
+		enum CosumeType {
+			CONSUME_TYPE_EXPERIENCE = 1; //经验
+			CONSUME_TYPE_DIOMAND = 2; //钻石
+			CONSUME_TYPE_TIME = 3; //时间
+		}
+		optional int32 level_up = 1; //到达等级
+		optional CosumeType consume_type = 2; //消耗类型
+		optional int32 consume_value = 3; //消耗数量
+	}
+	repeated Consume consumes = 3 [ (repeated_size) = 20 ];
+}
+
+//场景
+message Scene {
+	optional ConfigType type_t = 1 [ default = CONFIG_TYPE_SCENE ];
+	optional CCommonProp common_prop = 2;
+	optional int32 length = 3; //长(单位：米)
+	optional int32 width = 4; //宽(单位：米)
+	optional string terrain_path = 5; //对应地形(Unity3D或者UnReal导出的地形路径)
+}
+/////////////////////////////////////////////////////
+// 物品(作为特殊配置)数据类别定义区
+//
+// 每项必须含有字段，且位置索引不能更换：
+// 
+//	optional ConfigType type_t = 1 [ default = ITEM_TYPE_POTION ];	//需要指定默认值
+//
+//	optional Item_CommonProp item_common_prop = 2; //物品公共属性
+//
+// 命名规则：Item_Xxxxxx
+//
+/////////////////////////////////////////////////////
+
+//物品通用属性
+message Item_CommonProp {
+	optional CCommonProp common_prop = 1; //通用属性
+	optional string show_name = 2; //显示名称
+	optional int32 quality = 3; //品质
+	optional int32 min_level_limit = 4; //使用级别最小限制
+	optional int32 max_level_limit = 5; //使用级别最大限制
+	optional int32 pile_max = 6; //堆叠上限
+	optional int32 batch_use = 7; //能否批量使用(BOOL)
+	optional int32 auto_use = 8; //能否自动使用(BOOL)
+	optional int32 cool_down_id = 9; //冷却ID([CoolDown]数据)
+	optional InventoryType inventory = 10; //默认进包
+	optional ProfType prof_mask = 11; //归属职业
+}
+
+//物品基类(所有物品都包在此)
+message Item_Item {	
+	optional ConfigType type_t = 1 [ default = ITEM_TYPE_BEGIN ];
+	optional bytes stuff = 2; //物品基础数据
+	optional bytes stuff_extra = 3; //物品额外存盘数据
+}
+
+//药品
+message Item_Potion {
+	enum PotionType	{
+		POTION_TYPE_HEMO = 1; //回血丹
+		POTION_TYPE_MAGIC = 2; //回魔丹
+		POTION_TYPE_PHYSICAL_STRENGTH = 3; //体力丹
+	}
+	optional ConfigType type_t = 1 [ default = ITEM_TYPE_POTION ];
+	optional Item_CommonProp item_common_prop = 2; //物品公共属性
+	optional PotionType potion_type = 3; //药品类型
+	optional int32 increase_value = 4; //增加属性
+}
+
+//装备
+message Item_Equipment {
+	enum EuipType	{
+		EQUIP_TYPE_HELMET = 1; //头盔
+	}
+	optional ConfigType type_t = 1 [ default = ITEM_TYPE_EQUIPMENT ];
+	optional Item_CommonProp item_common_prop = 2; //物品公共属性
+	optional EuipType equip_type = 3; //装备类型
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
