@@ -26,7 +26,7 @@ class Entity : public std::enable_shared_from_this<Entity>
 public:
 	int64_t _ID; //所有实体的唯一识别不能重复
 	Scene* _locate_scene; //实体所在场景
-	real::CommonProp _common_prop; //公共属性
+	Asset::CommonProp _common_prop; //公共属性
 public:
 	Entity(); 
 	virtual ~Entity(); 
@@ -35,11 +35,11 @@ public:
 
 	virtual void EnterScene() { }
 	virtual void LeaveScene() { }
-	virtual void StepMove(real::Vector3& position) { } 
-	virtual void UpdatePosition(real::Vector3& position) { _common_prop.mutable_position()->CopyFrom(position); }
+	virtual void StepMove(Asset::Vector3& position) { } 
+	virtual void UpdatePosition(Asset::Vector3& position) { _common_prop.mutable_position()->CopyFrom(position); }
 	virtual void UpdatePosition(float x, float z) //不用Y坐标
 	{ 
-		real::Vector3 position; 
+		Asset::Vector3 position; 
 		position.set_x(x);
 		position.set_z(z);
 		UpdatePosition(position);
@@ -54,9 +54,9 @@ public:
 	virtual int32_t Save() { return 0; }
 	
 	//消息处理
-	virtual void HandleMessage(real::MsgItem& item) { } 
-	virtual void SendMessage(real::MsgItem& item) { }
-	virtual void SendNearbyMessage(real::MsgItem& message) { }
+	virtual void HandleMessage(Asset::MsgItem& item) { } 
+	virtual void SendMessage(Asset::MsgItem& item) { }
+	virtual void SendNearbyMessage(Asset::MsgItem& message) { }
 	//协议处理(Protocol Buffer)
 	virtual void HandleProtocol(pb::Message& message) { } 
 	virtual void SendProtocol(pb::Message& message) { }

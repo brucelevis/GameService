@@ -16,6 +16,7 @@
 #include "Protocol.h"
 #include "WorldSession.h"
 #include "Item_Potion.h"
+#include <fstream>
 
 const int const_world_sleep = 50;
 
@@ -82,7 +83,7 @@ void ShutdownThreadPool(std::vector<std::shared_ptr<std::thread>>& threads)
 int main(int argc, const char* argv[])
 {
 		/*	
-		real::Item_Potion* message = new real::Item_Potion();
+		Asset::Item_Potion* message = new Asset::Item_Potion();
 		message->mutable_item_common_prop()->set_quality(5);
 		Item* item = new Item(message);	
 		bool re = item->CanUse();
@@ -91,6 +92,7 @@ int main(int argc, const char* argv[])
 	std::cout << "Service starting..." << std::endl;
 	try 
 	{
+
 		//协议初始化
 		if (!ProtocolInstance.Load()) return 1;
 		//数据初始化

@@ -26,7 +26,7 @@ public:
 	int64_t GetID() { return this->_ID; }
 public:
 	void EnterScene(Entity* entity);
-	void UpdatePosition(Entity* entity, real::Vector3& position);	//更新玩家在场景中的位置
+	void UpdatePosition(Entity* entity, Asset::Vector3& position);	//更新玩家在场景中的位置
 	void LeaveScene(Entity* entity);
 	int32_t GetNearByEntities(Entity* entity, std::vector<int64_t>& entities); //获取附近指定类型的实体
 };

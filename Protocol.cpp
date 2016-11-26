@@ -33,7 +33,7 @@ bool ProtocolManager::Load()
 		}
 
 		int type_t = field->default_value_enum()->number();
-		if (type_t > real::META_TYPE_C2S_COUNT) continue; 	//只加载C2S的协议处理
+		if (type_t > Asset::META_TYPE_C2S_COUNT) continue; 	//只加载C2S的协议处理
 		
 		const pb::Message* msg = pb::MessageFactory::generated_factory()->GetPrototype(descriptor);
 		pb::Message* message = msg->New();

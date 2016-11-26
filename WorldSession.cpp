@@ -24,20 +24,20 @@ void WorldSession::InitializeHandler(const boost::system::error_code error, cons
 		{
 			/*
 			{
-				real::Login login;
-				login.set_type_t(real::META_TYPE_C2S_LOGIN);
+				Asset::Login login;
+				login.set_type_t(Asset::META_TYPE_C2S_LOGIN);
 				login.mutable_account()->set_username("zhenyunheng@zulong.com");
 				login.mutable_account()->set_password("123456");
 
-				real::Meta smeta;
-				smeta.set_type_t(real::META_TYPE_C2S_LOGIN);
+				Asset::Meta smeta;
+				smeta.set_type_t(Asset::META_TYPE_C2S_LOGIN);
 				smeta.set_stuff(login.SerializeAsString());
 	
 				std::string content = smeta.SerializeAsString();
 				AsyncSend(content.c_str(), content.size());
 			}
 			*/
-			real::Meta meta;
+			Asset::Meta meta;
 			bool result = meta.ParseFromArray(_buffer.data(), bytes_transferred);
 			if (!result) 
 			{
@@ -63,9 +63,9 @@ void WorldSession::InitializeHandler(const boost::system::error_code error, cons
 			}
 			/*
 			//由于是登录协议，需要加载数据，因此此处特殊处理
-			if (real::META_TYPE_C2S_LOGIN == meta.type_t())
+			if (Asset::META_TYPE_C2S_LOGIN == meta.type_t())
 			{	
-				const real::Login* login = dynamic_cast<real::Login*>(message);
+				const Asset::Login* login = dynamic_cast<Asset::Login*>(message);
 				if (!login) 
 				{
 					std::cout << __func__ << ":Login parse error." << std::endl;	

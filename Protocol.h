@@ -55,9 +55,9 @@ public:
 		return it->second;
 	}
 	
-	void AddHandler(real::MetaType message_type, CallBack callback)
+	void AddHandler(Asset::MetaType message_type, CallBack callback)
 	{
-		if (!real::MetaType_IsValid(message_type)) return;
+		if (!Asset::MetaType_IsValid(message_type)) return;
 		_callbacks.emplace(message_type, callback);
 	}
 	

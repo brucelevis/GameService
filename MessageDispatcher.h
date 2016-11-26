@@ -10,10 +10,10 @@ using namespace std::chrono;
 class PriorityQueueItem : public std::enable_shared_from_this<PriorityQueueItem>
 {
 private:
-	real::MsgItem _item;
+	Asset::MsgItem _item;
 public:
 
-	PriorityQueueItem(real::MsgItem item)
+	PriorityQueueItem(Asset::MsgItem item)
 	{
 		this->_item = item;
 	}
@@ -23,7 +23,7 @@ public:
 		return _item.priority() > other._item.priority();	//最小值优先，优先级级别：1~10，默认为10
 	}
 
-	real::MsgItem& Get()
+	Asset::MsgItem& Get()
 	{
 		return _item;
 	}
@@ -44,13 +44,13 @@ public:
 	//消息队列存盘(一般游戏逻辑不需做此操作)
 	void Save() 
 	{
-		//real::MsgItems items;	//用于存盘
+		//Asset::MsgItems items;	//用于存盘
 	}	
 
 	//消息队列加载(一般游戏逻辑不需做此操作)
 	void Load() 
 	{
-		//real::MsgItems items;	//用于加载
+		//Asset::MsgItems items;	//用于加载
 	}		
 
 	MessageDispatcher()
@@ -64,7 +64,7 @@ public:
 		return _instance;
 	}
 
-	void SendMessage(real::MsgItem& msg)
+	void SendMessage(Asset::MsgItem& msg)
 	{
 		auto item = std::make_shared<PriorityQueueItem>(msg);
 		system_clock::time_point curr_time = system_clock::now();
@@ -87,7 +87,7 @@ public:
 				sleep(1);
 				continue;
 			}
-			real::MsgItem& message = _messages.GetNext()->Get();
+			Asset::MsgItem& message = _messages.GetNext()->Get();
 			int32_t delay = 0;
 			if (message.has_delay()) delay = message.delay();
 			system_clock::time_point curr_time = system_clock::now();
@@ -98,7 +98,7 @@ public:
 		}
 	}
 
-	void Discharge(int64_t receiver, real::MsgItem& message)
+	void Discharge(int64_t receiver, Asset::MsgItem& message)
 	{
 		auto entity = EntityInstance.GetEntity(receiver);
 		if (!entity) return;

@@ -20,7 +20,7 @@ class Player : public Entity
 {
 	std::shared_ptr<WorldSession> _session;	
 private:
-	real::Player _stuff;
+	Asset::Player _stuff;
 public:
 	Player();
 	Player(int64_t player_id, std::shared_ptr<WorldSession> session);
@@ -35,20 +35,20 @@ public:
 	
 	virtual void EnterScene() override;
 	virtual void LeaveScene() override;
-	virtual void StepMove(real::Vector3& position) override;
-	virtual void HandleMessage(real::MsgItem& item) override;
-	virtual void SendMessage(real::MsgItem& item) override; 
-	virtual void SendNearbyMessage(real::MsgItem& item) override;
+	virtual void StepMove(Asset::Vector3& position) override;
+	virtual void HandleMessage(Asset::MsgItem& item) override;
+	virtual void SendMessage(Asset::MsgItem& item) override; 
+	virtual void SendNearbyMessage(Asset::MsgItem& item) override;
 	virtual void HandleProtocol(pb::Message& message) override {} 
 	virtual void SendProtocol(pb::Message& message) override; 
 	virtual void SendNearbyProtocol(pb::Message& message) override;
 public:
-	const real::Inventories& GetInventories()
+	const Asset::Inventories& GetInventories()
 	{
 		return _stuff.inventory();
 	}
 
-	const real::Inventories_Inventory& GetInventory(real::InventoryType type)
+	const Asset::Inventories_Inventory& GetInventory(Asset::INVENTORY_TYPE type)
 	{
 		return _stuff.inventory().inventories(type);
 	}	

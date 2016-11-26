@@ -12,7 +12,7 @@ void Scene::EnterScene(Entity* entity)
 	_z_entities[entity->GetX()].emplace(entity->GetID());
 }
 
-void Scene::UpdatePosition(Entity* entity, real::Vector3& position)
+void Scene::UpdatePosition(Entity* entity, Asset::Vector3& position)
 {
 	if (!entity) return;
 	_x_entities[entity->GetX()].erase(entity->GetID());
