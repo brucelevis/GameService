@@ -4,7 +4,15 @@
  *
  * 主要用来生成TOCKEN
  *
- * 账号认证，其本质是一个WEB服务器
+ * 账号认证，其本质是一个WEB服务器，此处为了实现方便，做一个普通服务器，
+ *
+ * 主要由两部分组成：
+ *
+ * (1) 账号认证 Auth
+ * 	所有客户端查询账号和密码.
+ *
+ * (2) 游戏服务器列表 RealmList
+ * 	所有游戏服务器，注册到该模块.
  *
  * */
 #include <string>
@@ -13,7 +21,7 @@
 #include <atomic>
 #include <unordered_map>
 #include <boost/asio.hpp>
-#include "Login.pb.h"
+#include "Auth.pb.h"
 
 namespace Adoter
 {
@@ -54,7 +62,6 @@ public:
 		return _instance;
 	}
 
-	void HandleLogin(/*Session* session*/);
 	void AddTicket(const std::string& ticket, Auth::Account* account);
 	bool CheckAccount() { return true; }
 };

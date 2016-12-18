@@ -1,5 +1,6 @@
 #pragma once
 
+#include "P_Header.h"
 #include "PriorityQueue.h"
 
 namespace Adoter
@@ -13,9 +14,9 @@ private:
 	Asset::MsgItem _item;
 public:
 
-	PriorityQueueItem(Asset::MsgItem item)
+	explicit PriorityQueueItem(Asset::MsgItem& item)
 	{
-		this->_item = item;
+		this->_item.CopyFrom(item);
 	}
 
 	bool operator < (const PriorityQueueItem& other) const
@@ -23,10 +24,8 @@ public:
 		return _item.priority() > other._item.priority();	//最小值优先，优先级级别：1~10，默认为10
 	}
 
-	Asset::MsgItem& Get()
-	{
-		return _item;
-	}
+	const Asset::MsgItem& Get() { return _item; }
+	const Asset::MsgItem& Get() const { return _item; }
 };
 
 class MessageDispatcher : public std::enable_shared_from_this<MessageDispatcher>
@@ -34,12 +33,10 @@ class MessageDispatcher : public std::enable_shared_from_this<MessageDispatcher>
 private:
 	std::mutex _mutex;
 	std::shared_ptr<std::thread> _thread;
-	PriorityQueue<std::shared_ptr<PriorityQueueItem>> _messages;
+	PriorityQueue<PriorityQueueItem> _messages;
 public:
-	~MessageDispatcher()
-	{
-		_thread->join();
-	}
+	~MessageDispatcher() { _thread->join();	}
+	MessageDispatcher() { _thread = std::make_shared<std::thread>(std::bind(&MessageDispatcher::Dispatcher, this));	}
 	
 	//消息队列存盘(一般游戏逻辑不需做此操作)
 	void Save() 
@@ -53,57 +50,17 @@ public:
 		//Asset::MsgItems items;	//用于加载
 	}		
 
-	MessageDispatcher()
-	{
-		_thread = std::make_shared<std::thread>(std::bind(&MessageDispatcher::Dispatcher, this));
-	}
 
 	static MessageDispatcher& Instance()
 	{
 		static MessageDispatcher _instance;
 		return _instance;
 	}
-
-	void SendMessage(Asset::MsgItem& msg)
-	{
-		auto item = std::make_shared<PriorityQueueItem>(msg);
-		system_clock::time_point curr_time = system_clock::now();
-		msg.set_time(system_clock::to_time_t(curr_time));	//发送时间
-		_messages.Emplace(item);
-	}
-
-	bool Empty()
-	{
-		std::lock_guard<std::mutex> lock(_mutex);
-		return _messages.Empty();
-	}
-
-	void Dispatcher()
-	{
-		while(true)
-		{
-			if (Empty()) 
-			{
-				sleep(1);
-				continue;
-			}
-			Asset::MsgItem& message = _messages.GetNext()->Get();
-			int32_t delay = 0;
-			if (message.has_delay()) delay = message.delay();
-			system_clock::time_point curr_time = system_clock::now();
-			if (delay > 0 && system_clock::to_time_t(curr_time) < message.time() + delay) continue;	//还没到发送时间
-			int64_t receiver = message.receiver();
-			Discharge(receiver, message);
-			usleep(200);
-		}
-	}
-
-	void Discharge(int64_t receiver, Asset::MsgItem& message)
-	{
-		auto entity = EntityInstance.GetEntity(receiver);
-		if (!entity) return;
-		entity->HandleMessage(message);		//交给各个接受者处理
-	}
+public:
+	bool Empty(); //队列是否为空
+	void Dispatcher(); //分发消息
+	void SendMessage(Asset::MsgItem msg/*消息COPY*/); //发消息
+	bool Discharge(int64_t receiver, const Asset::MsgItem& message); //发送给接收者
 };
 
 #define DispatcherInstance MessageDispatcher::Instance()

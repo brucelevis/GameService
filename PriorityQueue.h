@@ -30,7 +30,7 @@ private:
 	std::priority_queue<T> _queue;
 	std::mutex _mutex;
 public:
-	void Emplace(const T& item)
+	void Emplace(const T item) //此处不要传入引用
 	{
 		std::lock_guard<std::mutex> lock(_mutex);
 		_queue.emplace(item);

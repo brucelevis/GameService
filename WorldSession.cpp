@@ -1,8 +1,13 @@
 #include "WorldSession.h"
+#include "RedisManager.h"
 #include "Player.h"
 
 namespace Adoter
 {
+
+//////////////////////////////////////////////////////////////////////////////////////
+std::shared_ptr<Player> g_player = nullptr; //全局玩家定义，唯一的一个Player对象
+//////////////////////////////////////////////////////////////////////////////////////
 
 WorldSession::WorldSession(boost::asio::ip::tcp::socket&& socket) : Socket(std::move(socket))
 {
@@ -10,6 +15,11 @@ WorldSession::WorldSession(boost::asio::ip::tcp::socket&& socket) : Socket(std::
 
 void WorldSession::InitializeHandler(const boost::system::error_code error, const std::size_t bytes_transferred)
 {
+//	Asset::LoginResponse response;
+//	response.set_id(120);
+//	std::string content = response.SerializeAsString();
+//	AsyncSend(content.c_str(), content.size());
+
 	try
 	{
 		std::cout << "------------------------------" << _socket.remote_endpoint().address() << std::endl;
@@ -22,21 +32,24 @@ void WorldSession::InitializeHandler(const boost::system::error_code error, cons
 		}
 		else
 		{
-			/*
-			{
-				Asset::Login login;
-				login.set_type_t(Asset::META_TYPE_C2S_LOGIN);
-				login.mutable_account()->set_username("zhenyunheng@zulong.com");
-				login.mutable_account()->set_password("123456");
+				{
+					Asset::EnterGame enter_game;
+					enter_game.set_type_t(Asset::META_TYPE_C2S_ENTER_GAME);
+					enter_game.set_player_id(100000);
 
-				Asset::Meta smeta;
-				smeta.set_type_t(Asset::META_TYPE_C2S_LOGIN);
-				smeta.set_stuff(login.SerializeAsString());
-	
-				std::string content = smeta.SerializeAsString();
-				AsyncSend(content.c_str(), content.size());
-			}
-			*/
+					Asset::Meta smeta;
+					smeta.set_type_t(Asset::META_TYPE_C2S_ENTER_GAME);
+					smeta.set_stuff(enter_game.SerializeAsString());
+
+					std::string content = smeta.SerializeAsString();
+					AsyncSend(content.c_str(), content.size());
+					const char* buff = content.c_str();
+					for (size_t i = 0; i < content.size(); ++i)
+					{
+						std::cout << buff[i] << " ";
+					}	
+					std::cout << std::endl;
+				}
 			Asset::Meta meta;
 			bool result = meta.ParseFromArray(_buffer.data(), bytes_transferred);
 			if (!result) 
@@ -45,6 +58,17 @@ void WorldSession::InitializeHandler(const boost::system::error_code error, cons
 				Close();
 				return;		//非法协议
 			}
+			
+			/////////////////////////////////////////////////////////////////////////////打印收到协议提示信息
+		
+			const pb::FieldDescriptor* type_field = meta.GetDescriptor()->FindFieldByName("type_t");
+			if (!type_field) return;
+
+			const pb::EnumValueDescriptor* enum_value = meta.GetReflection()->GetEnum(meta, type_field);
+			if (!enum_value) return;
+
+			const std::string& enum_name = enum_value->name();
+			std::cout << "Received message type is: " << enum_name.c_str() << std::endl;
 			
 			google::protobuf::Message* message = ProtocolInstance.GetMessage(meta.type_t());	
 			if (!message) 
@@ -61,42 +85,47 @@ void WorldSession::InitializeHandler(const boost::system::error_code error, cons
 				Close();
 				return;		//非法协议
 			}
-			/*
-			//由于是登录协议，需要加载数据，因此此处特殊处理
-			if (Asset::META_TYPE_C2S_LOGIN == meta.type_t())
-			{	
-				const Asset::Login* login = dynamic_cast<Asset::Login*>(message);
-				if (!login) 
-				{
-					std::cout << __func__ << ":Login parse error." << std::endl;	
-					return;		//非法协议
-				}
-				std::cout << __func__ << ":模拟登陆." << std::endl;	
-				for (int i = 0; i < 1; ++i)
-				{
-					//std::shared_ptr<Player> player(new Player(login->player_id(), shared_from_this()));
-					//usleep(100);
-					std::shared_ptr<Player> player(new Player(10001, shared_from_this()));
-					player->SetScene(SceneInstance.GetScene(1000).get());
-					if (!player->Login())	//登录成功
-					{
-						//EntityInstance.Add(player);	//实体通用管理类
-						EntityInstance.Emplace(10001, player);	//实体通用管理类
-					}
-				}
+			
+			/////////////////////////////////////////////////////////////////////////////游戏逻辑处理流程
+			
+			if (Asset::META_TYPE_C2S_CREATE_PLAYER == meta.type_t()) //创建角色
+			{
+				const Asset::CreatePlayer* create_player = dynamic_cast<Asset::CreatePlayer*>(message);
+				if (!create_player) return; 
+				
+			 	std::shared_ptr<Redis> redis = std::make_shared<Redis>();
+				int64_t player_id = redis->CreatePlayer();
+				if (player_id == 0) return; //创建失败
+
+				g_player = std::make_shared<Player>(player_id, shared_from_this());
+				g_player->Save(); //存盘，防止数据库无数据
+			}
+			else if (Asset::META_TYPE_C2S_ENTER_GAME == meta.type_t()) //进入游戏
+			{
+				if (g_player) return; //已经在登录状态
+
+				const Asset::EnterGame* enter_game = dynamic_cast<Asset::EnterGame*>(message);
+				if (!enter_game) return; 
+
+				if (!g_player) g_player = std::make_shared<Player>(enter_game->player_id(), shared_from_this());
+				g_player->OnEnterGame(); //加载数据
 			}
 			else
-			*/
 			{
+				if (!g_player) 
+				{
+					std::cerr << "Player has not inited. " << std::endl;
+					return; //未初始化的Player
+				}
 				//其他协议的调用规则
-				CallBack callback = ProtocolInstance.GetMethod(meta.type_t()); 
-				callback(message);	
+				g_player->HandleProtocol(meta.type_t(), message);
 			}
 		}
 	}
 	catch (std::exception& e)
 	{
-		std::cerr << "Exception: " << e.what() << std::endl;
+		std::cerr << __func__ << ":Exception: " << e.what() << std::endl;
+		//g_player->Logout(nullptr); //网络断开，释放对象
 		return;
 	}
 	//递归持续接收	
@@ -106,6 +135,13 @@ void WorldSession::InitializeHandler(const boost::system::error_code error, cons
 void WorldSession::Start()
 {
 	AsyncReceiveWithCallback(&WorldSession::InitializeHandler);
+}
+	
+bool WorldSession::Update() 
+{ 
+	if (!g_player) return true;
+	g_player->Update(); 
+	return true;
 }
 
 void WorldSessionManager::Add(std::shared_ptr<WorldSession> session)

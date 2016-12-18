@@ -8,8 +8,8 @@ static boost::asio::io_service* _io_service;
 
 void SignalHandler(const boost::system::error_code& error, int number)
 {    
-	if (!error)        
-		_io_service->stop();
+	//if (!error)        
+	//	_io_service->stop();
 }
 
 int main(int argc, const char* argv[])
@@ -28,13 +28,13 @@ int main(int argc, const char* argv[])
 			return 1;
 		}
 		std::cout << "Service start success..." << std::endl;
-		boost::asio::signal_set signals(*_io_service, SIGINT, SIGTERM);
-		signals.async_wait(SignalHandler);
+		//boost::asio::signal_set signals(*_io_service, SIGINT, SIGTERM);
+		//signals.async_wait(SignalHandler);
 		
-		SessionInstance.StartNetwork(*_io_service, "0.0.0.0", 40001);
+		SessionInstance.StartNetwork(*_io_service, "0.0.0.0", 60000);
 
 		_io_service->run();		
-		signals.cancel();
+		//signals.cancel();
 	}
 	catch (std::exception& e)
 	{

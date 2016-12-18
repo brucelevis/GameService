@@ -75,7 +75,7 @@ public:
 	}
 	virtual void OnSend(const boost::system::error_code& error, std::size_t bytes_transferred)
 	{
-
+		std::cout << __func__ << ":bytes_transferred:" << bytes_transferred << " has error:" << error << std::endl;
 	}
 
 protected:
@@ -107,9 +107,9 @@ public:
 		{
 			_acceptor = new AsyncAcceptor(io_service, bind_ip, port);
 		}
-		catch (const boost::system::system_error& err)
+		catch (const boost::system::system_error& error)
 		{
-			std::cout << __func__ << ":Start Server IP:" << bind_ip << " PORT:" << port << " Error:" << err.what() << std::endl;
+			std::cout << __func__ << ":Start Server IP:" << bind_ip << " PORT:" << port << " Error:" << error.what() << std::endl;
 			return false;
 		}
 
@@ -155,8 +155,9 @@ public:
 			newSocket->Start();            
 			_threads[thread_index].AddSocket(newSocket);        //网络线程
 		}        
-		catch (boost::system::system_error const& err)        
+		catch (const boost::system::system_error& error)        
 		{            
+			std::cout << __func__ << " Error:" << error.what() << std::endl;
 		}
 	}
 	

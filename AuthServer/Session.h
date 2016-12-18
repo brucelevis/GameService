@@ -23,7 +23,8 @@ public:
 	
 	virtual void Start() override;
 	virtual bool Update() override { return true; }
-	virtual void InitializeHandler(const boost::system::error_code error, const std::size_t bytes_transferred);
+	//协议处理
+	virtual void ProtocolHandler(const boost::system::error_code error, const std::size_t bytes_transferred);
 };
 
 class SessionManager : public SocketManager<Session> 

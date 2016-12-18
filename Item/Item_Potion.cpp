@@ -11,7 +11,7 @@ Item_Potion::Item_Potion()
 {
 }
 
-Item_Potion::Item_Potion(real::Item_Potion* stuff)
+Item_Potion::Item_Potion(Asset::Item_Potion* stuff)
 {
 	_stuff->set_stuff(stuff->SerializeAsString());
 	_stuff->set_type_t(stuff->type_t());

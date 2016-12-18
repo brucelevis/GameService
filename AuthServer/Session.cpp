@@ -1,5 +1,5 @@
 #include "Session.h"
-#include "Login.pb.h"
+#include "Auth.pb.h"
 
 namespace Adoter
 {
@@ -8,7 +8,7 @@ Session::Session(boost::asio::ip::tcp::socket&& socket) : Socket(std::move(socke
 {
 }
 
-void Session::InitializeHandler(const boost::system::error_code error, const std::size_t bytes_transferred)
+void Session::ProtocolHandler(const boost::system::error_code error, const std::size_t bytes_transferred)
 {
 	std::cout << "--------------------------" << std::endl;
 
@@ -60,12 +60,12 @@ void Session::InitializeHandler(const boost::system::error_code error, const std
 		return;
 	}
 	//递归持续接收	
-	AsyncReceiveWithCallback(&Session::InitializeHandler);
+	AsyncReceiveWithCallback(&Session::ProtocolHandler);
 }
 
 void Session::Start()
 {
-	AsyncReceiveWithCallback(&Session::InitializeHandler);
+	AsyncReceiveWithCallback(&Session::ProtocolHandler);
 }
 
 NetworkThread<Session>* SessionManager::CreateThreads() const

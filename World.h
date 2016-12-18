@@ -19,9 +19,8 @@ namespace Adoter
 class World : public std::enable_shared_from_this<World>
 {
 private:
-	bool _stopped;
-	int32_t _update_time;
-	int32_t _update_time_count;
+	bool _stopped = false;
+	int64_t _heart_count = 0; //心跳记次
 public:
 	World();
 	~World(); 
@@ -34,10 +33,10 @@ public:
 
 	bool IsStopped() { return _stopped; }
 
-	/*	
-	 * 世界中所有刷新都在此(比如刷怪，拍卖行更新...)
-	 * */
+	//世界中所有刷新都在此(比如刷怪，拍卖行更新...)，当前周期为50MS.
 	void Update(int32_t diff);
+	//加载所有
+	bool Load();
 };
 
 #define WorldInstance World::Instance()

@@ -13,10 +13,8 @@
 #include <boost/bind.hpp>
 #include "Timer.h"
 #include "World.h"
-#include "Protocol.h"
 #include "WorldSession.h"
-#include "Item_Potion.h"
-#include <fstream>
+#include "Log.h"
 
 const int const_world_sleep = 50;
 
@@ -32,8 +30,7 @@ std::shared_ptr<boost::asio::io_service::work> _io_service_work;
 
 void SignalHandler(const boost::system::error_code& error, int)
 {    
-	if (!error)        
-		;//World::StopNow(SHUTDOWN_EXIT_CODE);
+	//if (!error) World::StopNow(SHUTDOWN_EXIT_CODE);
 }
 
 void WorldUpdateLoop()
@@ -52,7 +49,7 @@ void WorldUpdateLoop()
 		
 		prev_time = curr_time;
 		
-		if (diff <= const_world_sleep + prev_sleep_time) //50毫秒一次更新
+		if (diff <= const_world_sleep + prev_sleep_time) //50MS
 		{            
 			prev_sleep_time = const_world_sleep + prev_sleep_time - diff;            
 			std::this_thread::sleep_for(std::chrono::milliseconds(prev_sleep_time));        
@@ -92,11 +89,8 @@ int main(int argc, const char* argv[])
 	std::cout << "Service starting..." << std::endl;
 	try 
 	{
-
-		//协议初始化
-		if (!ProtocolInstance.Load()) return 1;
-		//数据初始化
-		if (!AssetInstance.Load()) return 2;
+		//世界初始化，涵盖所有....
+		if (!WorldInstance.Load()) return 1;
 
 		//网络初始化
 		_io_service_work = std::make_shared<boost::asio::io_service::work>(_io_service);
@@ -112,17 +106,20 @@ int main(int argc, const char* argv[])
 		//boost::asio::signal_set signals(_io_service, SIGINT, SIGTERM);
 		//signals.async_wait(SignalHandler);
 
-		WorldSessionInstance.StartNetwork(_io_service, "0.0.0.0", 40000, 5);
+		WorldSessionInstance.StartNetwork(_io_service, "0.0.0.0", 50000, 5);
 
 		//世界循环
 		WorldUpdateLoop();
+	
+		std::cout << "Service stop..." << std::endl;
 
 		ShutdownThreadPool(_threads);
 	}
 	catch (std::exception& e)
 	{
-		std::cerr << "Exception: " << e.what() << "\n";
+		std::cerr << __func__ << ":Exception: " << e.what() << std::endl;
 	}
 	
+	std::cout << "Service stoped." << std::endl;
 	return 0;
 }

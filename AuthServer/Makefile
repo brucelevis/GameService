@@ -6,7 +6,7 @@ CXXFLAGS += $(OPT) -pipe -Wno-unused-local-typedefs -Wno-unused-but-set-variable
 LIBRARY=$(PROTOBUF_DIR)/lib/libprotobuf.a -L$(BOOST_ROOT)/stage/lib/ 
 LDFLAGS = -lboost_system -lboost_thread -lprotobuf
 
-PROTO_SRC=Login.proto 
+PROTO_SRC=Auth.proto 
 PROTO_OBJ=$(patsubst %.proto,%.pb.o,$(PROTO_SRC))
 PROTO_OPTIONS=--proto_path=. --proto_path=$(PROTOBUF_DIR)/include
 #PROTO_OPTIONS=--proto_path=../ 

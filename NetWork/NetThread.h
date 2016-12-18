@@ -85,7 +85,7 @@ public:
 
 	virtual void Run()
 	{
-		std::cout << "Starting Network Thread..." << std::endl;
+		std::cout << "Starting network thread..." << std::endl;
 		_update_timer.expires_from_now(boost::posix_time::milliseconds(10));
 		_update_timer.async_wait(std::bind(&NetworkThread<SOCKET_TYPE>::Update, this));        
 		

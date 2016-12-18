@@ -30,15 +30,12 @@ namespace pb = google::protobuf;
 
 class ProtocolManager : public std::enable_shared_from_this<ProtocolManager>
 {
-	typedef std::function<int32_t(pb::Message*)> CallBack;
 private:
 	bool _parse_sucess;
 	std::string _proto_file_path;
 	
 	std::unordered_map<int32_t, pb::Message*>  _messages;
-	std::unordered_map<int32_t, CallBack>  _callbacks;	//每个协议的回调函数
 
-	CallBack _method;
 public:
 	ProtocolManager();
 
@@ -55,22 +52,8 @@ public:
 		return it->second;
 	}
 	
-	void AddHandler(Asset::MetaType message_type, CallBack callback)
-	{
-		if (!Asset::MetaType_IsValid(message_type)) return;
-		_callbacks.emplace(message_type, callback);
-	}
-	
-	CallBack& GetMethod(int32_t message_type)
-	{
-		auto it = _callbacks.find(message_type);
-		if (it == _callbacks.end()) return _method;
-		return it->second;
-	}
-	
+	//加载协议	
 	bool Load();
-	
-	int32_t DefaultMethod(pb::Message*);
 };
 
 #define ProtocolInstance ProtocolManager::Instance()
